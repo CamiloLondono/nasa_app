@@ -3,8 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart'; // Para abrir URLs en el navegador
 import '../providers/planets_provider.dart';
 
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+class ApodScreen extends StatelessWidget {
+  const ApodScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -35,16 +35,25 @@ class HomeScreen extends StatelessWidget {
                   SizedBox(height: 10),
                   // Verificamos si el contenido es imagen o video
                   if (planetsProvider.todayPlanet!.mediaType == "image") ...[
-                    Image.network(
-                      planetsProvider.todayPlanet!.hdurl,
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return Center(child: CircularProgressIndicator());
+                    GestureDetector(
+                      onTap: () async {
+                        final Uri uri =
+                            Uri.parse(planetsProvider.todayPlanet!.hdurl);
+                        if (await canLaunchUrl(uri)) {
+                          await launchUrl(uri);
+                        }
                       },
-                      errorBuilder: (context, error, stackTrace) {
-                        print('Error cargando la imagen: $error');
-                        return Image.asset('assets/no-image.jpg');
-                      },
+                      child: Column(
+                        children: [
+                          Icon(Icons.image, size: 100, color: Colors.blue),
+                          SizedBox(height: 10),
+                          Text(
+                            'Haz clic aquí para ver la imagen',
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
                     ),
                   ] else if (planetsProvider.todayPlanet!.mediaType ==
                       "video") ...[
@@ -80,7 +89,7 @@ class HomeScreen extends StatelessWidget {
 
   // Función para abrir el video en el navegador
   void _openVideo(String url, BuildContext context) async {
-    final Uri uri = Atiparse(url);
+    final Uri uri = Uri.parse(url);
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri);
     } else {
